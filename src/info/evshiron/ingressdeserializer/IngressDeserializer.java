@@ -1,9 +1,6 @@
 package info.evshiron.ingressdeserializer;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.ObjectInputStream;
+import java.io.*;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 
@@ -11,7 +8,7 @@ public class IngressDeserializer {
 
     // Reference to https://gist.github.com/sugyan/8396d473ffae62b664e2, thanks to @sugyan.
 
-    public static String Deserializer(String path) {
+    public static String Deserializer(File file) {
 
         try {
 
@@ -19,7 +16,7 @@ public class IngressDeserializer {
 
             ArrayList<String[]> elements = new ArrayList<String[]>();
 
-            FileInputStream fis = new FileInputStream(path);
+            FileInputStream fis = new FileInputStream(file);
             ObjectInputStream ois = new ObjectInputStream(fis);
 
             while (ois.available() == 0) {
@@ -115,11 +112,25 @@ public class IngressDeserializer {
 
     public static void main(String[] args) {
 
-        for(String path : args) {
+            try {
 
-            System.out.println(Deserializer(path));
+                for(String path : args) {
 
-        }
+                    File file = new File(path);
+
+                    if(!file.exists() || !file.getName().endsWith(".obj")) continue;
+
+                    BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(String.format("out_%s", file.getName())), "utf-8"));
+
+                    writer.write(Deserializer(file));
+                    writer.flush();
+                    writer.close();
+
+                }
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
 
     }
 
