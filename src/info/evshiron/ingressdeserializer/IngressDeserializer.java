@@ -30,8 +30,13 @@ public class IngressDeserializer {
                     if (cls.getComponentType() == float.class) {
                         arr[i] = String.valueOf(Array.getFloat(obj, i));
                     }
-                    if (cls.getComponentType() == short.class) {
+                    else if (cls.getComponentType() == short.class) {
                         arr[i] = String.valueOf(Array.getShort(obj, i));
+                    }
+                    else {
+
+                        System.out.println(cls.getTypeName());
+
                     }
 
                 }
@@ -66,13 +71,21 @@ public class IngressDeserializer {
             fis.close();
             ois.close();
 
+            if(elements.get(0).length / 3 != elements.get(1).length / 2) {
+
+                System.out.println(file.getName());
+                System.out.println("VERTICES_TEXCOORDS_NOT_MATCH");
+                return null;
+
+            }
+
             StringBuilder sb = new StringBuilder();
 
             sb.append(String.format("# (x, y, z) count: %d.\n", elements.get(0).length / 3));
 
             for(int i = 0; i < elements.get(0).length; i += 3) {
 
-                sb.append(String.format("v %s %s %s\n", elements.get(0)[i+0], elements.get(0)[i+1], elements.get(0)[i+2]));
+                sb.append(String.format("v %f %f %f\n", Double.parseDouble(elements.get(0)[i+0]), Double.parseDouble(elements.get(0)[i+1]), Double.parseDouble(elements.get(0)[i+2])));
 
             }
 
@@ -80,7 +93,7 @@ public class IngressDeserializer {
 
             for(int i = 0; i < elements.get(1).length; i += 2) {
 
-                sb.append(String.format("vt %s %s\n", elements.get(1)[i+0], elements.get(1)[i+1]));
+                sb.append(String.format("vt %f %f\n", Double.parseDouble(elements.get(1)[i+0]), Double.parseDouble(elements.get(1)[i+1])));
 
             }
 
@@ -120,9 +133,13 @@ public class IngressDeserializer {
 
                     if(!file.exists() || !file.getName().endsWith(".obj")) continue;
 
+                    String wavefront = Deserializer(file);
+
+                    if(wavefront == null) continue;
+
                     BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(String.format("out_%s", file.getName())), "utf-8"));
 
-                    writer.write(Deserializer(file));
+                    writer.write(wavefront);
                     writer.flush();
                     writer.close();
 
